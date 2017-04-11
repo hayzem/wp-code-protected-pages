@@ -94,9 +94,10 @@ function createPluginDatabaseTable()
     if($wpdb->get_var( "show tables like '$wp_table'" ) != $wp_table) {
         $sql = "CREATE TABLE $wp_table (
               id mediumint(9) NOT NULL AUTO_INCREMENT,
-              created_at datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
               code tinytext NOT NULL,
+              name text NOT NULL,
               description text NOT NULL,
+              created_at datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
               PRIMARY KEY  (id)
             ) $charset_collate;
         ";
@@ -137,13 +138,14 @@ function insertEntity($entity)
         $wp_track_table,
         array(
             'code' => $entity['code'],
-            'created_at' => current_time( 'mysql' ),
+            'name' => $entity['name'],
             'description' => $entity['description'],
+            'created_at' => current_time( 'mysql' ),
         )
     );
 }
 
-function insertLog($entity)
+function insertLog($entity, $action = 'ACTION_UNKNOWN')
 {
     global $table_prefix, $wpdb;
 
@@ -154,7 +156,8 @@ function insertLog($entity)
         $wp_log_table,
         array(
             'entity_id' => $entity->id,
-            'details' => $entity->description,
+            'title' => $entity->name.' '.$action,
+            'details' => $entity->name.' '.$entity->description,
             'created_at' => current_time( 'mysql' ),
         )
     );
