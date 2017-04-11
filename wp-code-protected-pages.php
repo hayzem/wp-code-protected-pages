@@ -63,7 +63,7 @@ function update_passwords()
 
         if( $hasher->CheckPassword( $check_password, $hash ) ){
             $passed = $check_password;
-            insertLog($entity);
+            insertLog($entity, 'LOGGED_IN');
             break;
         }
     }
@@ -112,6 +112,7 @@ function createPluginDatabaseTable()
         $sql = "CREATE TABLE $wp_log_table (
               id mediumint(9) NOT NULL AUTO_INCREMENT,
               entity_id integer NOT NULL,
+              title text NOT NULL,
               details text NOT NULL,
               created_at datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
               PRIMARY KEY  (id)
