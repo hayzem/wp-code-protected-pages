@@ -172,3 +172,242 @@ function getEntities(array $options = [])
 
     return $wpdb->get_results( 'SELECT * FROM '.$wp_track_table.';', OBJECT );
 }
+
+
+class WPCodeProtectedPages
+{
+
+    private $screenName;
+    private static $instance;
+    private $_wpdb;
+    private $_tablePrefix;
+    private $_tableName = 'wcpp';
+    private $_tableNameLog = 'wcpp_log';
+
+    public function __construct()
+    {
+        global $table_prefix, $wpdb;
+
+        $this->_wpdb = $wpdb;
+        $this->_tablePrefix = $table_prefix;
+
+    }
+
+    static function getInstance()
+    {
+
+        if (!isset(self::$instance))
+        {
+            self::$instance = new self();
+        }
+        return self::$instance;
+    }
+
+    public function adminMenu()
+    {
+        add_menu_page('Passcode', 'Passcode', 'manage_options', __FILE__, [$this, 'renderPage'], plugins_url('/img/icon.png',__DIR__));
+        add_submenu_page(__FILE__, 'Dashboard', 'Dashboard', 'manage_options', __FILE__, [$this, 'renderPage']);
+        add_submenu_page(__FILE__, 'New', 'New', 'manage_options', __FILE__.'/new', [$this, 'renderNewPage']);
+        add_submenu_page(__FILE__, 'List', 'List', 'manage_options', __FILE__.'/list', [$this, 'renderListPage']);
+        add_submenu_page(__FILE__, 'Log', 'Log', 'manage_options', __FILE__.'/log', [$this, 'renderLogPage']);
+    }
+
+    public function renderPage(){
+        ?>
+        <div class='wrap'>
+            <h2>Passcode Dashboard</h2>
+        </div>
+        <?php
+    }
+
+    public function renderNewPage(){
+        ?>
+        <div class="wrap">
+            <?php screen_icon(); ?>
+            <h2><?php esc_html_e( 'Passcode Add New' ); ?></h2>
+            <form action="<?php echo esc_url( admin_url('admin-post.php') ); ?>" method="post">
+                <input type="hidden" name="action" value="wcpp_entity_post">
+                <table class="form-table">
+                    <tbody>
+                    <tr>
+                        <th>
+                            <label for="wcpp_code">Code</label>
+                        </th>
+                        <td>
+                            <input type="text" name="wcpp_code" placeholder="Code" required="required"/>	<input type="button" value="Generate Code" class="button" /><br />
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            <label for="wcpp_name">Name</label>
+                        </th>
+                        <td>
+                            <input type="text" name="wcpp_name" placeholder="Name"  required="required"/><br />
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            <label for="wcpp_description">Description</label>
+                        </th>
+                        <td>
+                            <input type="text" name="wcpp_description" placeholder="Description" required="required" /><br />
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                        </th>
+                        <td>
+                            <input type="submit" value="Save" class="button-primary" />
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </form>
+        </div><!-- .wrap -->
+        <?php
+    }
+
+    public function renderListPage(){
+        $entities = $this->getEntities();
+        ?>
+        <div class="wrap">
+            <?php screen_icon(); ?>
+            <h2><?php esc_html_e( 'Passcode List' ); ?></h2>
+            <table class="form-table">
+                <thead>
+                    <tr>
+                    <th>#ID</th>
+                    <th>Code</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Date Created</th>
+                    </tr>
+                </thead>
+                <tbody>
+                <?php
+                foreach ($entities as $entity)
+                {
+                ?>
+                <tr>
+                    <td>
+                        <?=$entity->id?>
+                    </td>
+                    <td>
+                        <?=$entity->code?>
+                    </td>
+                    <td>
+                        <?=$entity->name?>
+                    </td>
+                    <td>
+                        <?=$entity->description?>
+                    </td>
+                    <td>
+                        <?=$entity->created_at?>
+                    </td>
+                </tr>
+                <?php
+                }
+                ?>
+                </tbody>
+            </table>
+        <?php
+    }
+
+    public function renderLogPage(){
+        $logs = $this->getLogs();
+        ?>
+        <div class="wrap">
+        <?php screen_icon(); ?>
+        <h2><?php esc_html_e( 'Passcode Log' ); ?></h2>
+        <table class="form-table">
+            <thead>
+            <tr>
+                <th>#ID</th>
+                <th>Title</th>
+                <th>Description</th>
+                <th>Date Created</th>
+            </tr>
+            </thead>
+            <tbody>
+            <?php
+            foreach ($logs as $log)
+            {
+                ?>
+                <tr>
+                    <td>
+                        <?=$log->id?>
+                    </td>
+                    <td>
+                        <?=$log->title?>
+                    </td>
+                    <td>
+                        <?=$log->details?>
+                    </td>
+                    <td>
+                        <?=$log->created_at?>
+                    </td>
+                </tr>
+                <?php
+            }
+            ?>
+            </tbody>
+        </table>
+        <?php
+    }
+
+    public function createEntity()
+    {
+        /**
+         * @todo: check fields
+         */
+
+        $entity = [
+            'code' => $_POST['wcpp_code'],
+            'name' => $_POST['wcpp_name'],
+            'description' => $_POST['wcpp_description'],
+        ];
+
+        $this->insertEntity($entity);
+    }
+
+    /**
+     * @param $entity
+     */
+    function insertEntity($entity)
+    {
+        $wp_track_table = $this->_tablePrefix . "$this->_tableName";
+
+        $this->_wpdb->insert(
+            $wp_track_table,
+            [
+                'code' => $entity['code'],
+                'name' => $entity['name'],
+                'description' => $entity['description'],
+                'created_at' => current_time( 'mysql' ),
+            ]
+        );
+    }
+
+    public function getEntities(array $options = [])
+    {
+        $wp_track_table = $this->_tablePrefix . "$this->_tableName";
+
+        return $this->_wpdb->get_results( 'SELECT * FROM '.$wp_track_table.';', OBJECT );
+    }
+
+    public function getLogs(array $options = [])
+    {
+        $wp_track_table = $this->_tablePrefix . "$this->_tableNameLog";
+
+        return $this->_wpdb->get_results( 'SELECT * FROM '.$wp_track_table.';', OBJECT );
+    }
+
+    public function init()
+    {
+        add_action('admin_menu', [$this, 'adminMenu']);
+        add_action('admin_post_wcpp_entity_post', [$this, 'createEntity'] );
+    }
+}
+
+$wcpp = WPCodeProtectedPages::getInstance();
+$wcpp->init();
