@@ -12,7 +12,6 @@
 
 class WPCodeProtectedPages
 {
-    private $screenName = 'WP Code Protected Pages';
     private static $instance;
     private $_wpdb;
     private $_post;
@@ -29,10 +28,9 @@ class WPCodeProtectedPages
         $this->_tablePrefix = $table_prefix;
     }
 
-    static function getInstance()
+    public static function getInstance()
     {
-        if (!isset(self::$instance))
-        {
+        if (!isset(self::$instance)) {
             self::$instance = new self();
         }
 
@@ -41,14 +39,15 @@ class WPCodeProtectedPages
 
     public function adminMenu()
     {
-        add_menu_page('Passcode', 'Passcode', 'manage_options', __FILE__, [$this, 'renderPage'], plugins_url('/img/icon.png',__DIR__));
+        add_menu_page('Passcode', 'Passcode', 'manage_options', __FILE__, [$this, 'renderPage'], plugins_url('/img/icon.png', __DIR__));
         add_submenu_page(__FILE__, 'Dashboard', 'Dashboard', 'manage_options', __FILE__, [$this, 'renderPage']);
         add_submenu_page(__FILE__, 'New', 'New', 'manage_options', __FILE__.'/new', [$this, 'renderNewPage']);
         add_submenu_page(__FILE__, 'List', 'List', 'manage_options', __FILE__.'/list', [$this, 'renderListPage']);
         add_submenu_page(__FILE__, 'Log', 'Log', 'manage_options', __FILE__.'/log', [$this, 'renderLogPage']);
     }
 
-    public function renderPage(){
+    public function renderPage()
+    {
         ?>
         <div class='wrap'>
             <h2>Passcode Dashboard</h2>
@@ -59,14 +58,16 @@ class WPCodeProtectedPages
             </ul>
         </div>
         <?php
+
     }
 
-    public function renderNewPage(){
+    public function renderNewPage()
+    {
         ?>
         <div class="wrap">
             <?php screen_icon(); ?>
-            <h2><?php esc_html_e( 'Passcode Add New' ); ?></h2>
-            <form action="<?php echo esc_url( admin_url('admin-post.php') ); ?>" method="post">
+            <h2><?php esc_html_e('Passcode Add New'); ?></h2>
+            <form action="<?php echo esc_url(admin_url('admin-post.php')); ?>" method="post">
                 <input type="hidden" name="action" value="wcpp_entity_post">
                 <table class="form-table">
                     <tbody>
@@ -106,14 +107,15 @@ class WPCodeProtectedPages
             </form>
         </div><!-- .wrap -->
         <?php
+
     }
 
-    public function renderListPage(){
-        $entities = $this->getEntities();
-        ?>
+    public function renderListPage()
+    {
+        $entities = $this->getEntities(); ?>
         <div class="wrap">
             <?php screen_icon(); ?>
-            <h2><?php esc_html_e( 'Passcode List' ); ?></h2>
+            <h2><?php esc_html_e('Passcode List'); ?></h2>
             <table class="form-table">
                 <thead>
                     <tr>
@@ -126,9 +128,8 @@ class WPCodeProtectedPages
                 </thead>
                 <tbody>
                 <?php
-                foreach ($entities as $entity)
-                {
-                ?>
+                foreach ($entities as $entity) {
+                    ?>
                 <tr>
                     <td>
                         <?=$entity->id?>
@@ -147,19 +148,20 @@ class WPCodeProtectedPages
                     </td>
                 </tr>
                 <?php
-                }
-                ?>
+
+                } ?>
                 </tbody>
             </table>
         <?php
+
     }
 
-    public function renderLogPage(){
-        $logs = $this->getLogs();
-        ?>
+    public function renderLogPage()
+    {
+        $logs = $this->getLogs(); ?>
         <div class="wrap">
         <?php screen_icon(); ?>
-        <h2><?php esc_html_e( 'Passcode Log' ); ?></h2>
+        <h2><?php esc_html_e('Passcode Log'); ?></h2>
         <table class="form-table">
             <thead>
             <tr>
@@ -171,8 +173,7 @@ class WPCodeProtectedPages
             </thead>
             <tbody>
             <?php
-            foreach ($logs as $log)
-            {
+            foreach ($logs as $log) {
                 ?>
                 <tr>
                     <td>
@@ -189,11 +190,12 @@ class WPCodeProtectedPages
                     </td>
                 </tr>
                 <?php
-            }
-            ?>
+
+            } ?>
             </tbody>
         </table>
         <?php
+
     }
 
     public function createEntity()
@@ -224,7 +226,7 @@ class WPCodeProtectedPages
                 'code' => $entity['code'],
                 'name' => $entity['name'],
                 'description' => $entity['description'],
-                'created_at' => current_time( 'mysql' ),
+                'created_at' => current_time('mysql'),
             ]
         );
     }
@@ -258,14 +260,14 @@ class WPCodeProtectedPages
     {
         $wp_track_table = $this->_tablePrefix . "$this->_tableName";
 
-        return $this->_wpdb->get_results( 'SELECT * FROM '.$wp_track_table.';', OBJECT );
+        return $this->_wpdb->get_results('SELECT * FROM '.$wp_track_table.';', OBJECT);
     }
 
     public function getLogs(array $options = [])
     {
         $wp_track_table = $this->_tablePrefix . "$this->_tableNameLog";
 
-        return $this->_wpdb->get_results( 'SELECT * FROM '.$wp_track_table.';', OBJECT );
+        return $this->_wpdb->get_results('SELECT * FROM '.$wp_track_table.';', OBJECT);
     }
 
     public function createPluginTables()
@@ -275,7 +277,7 @@ class WPCodeProtectedPages
 
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 
-        if($this->_wpdb->get_var( "show tables like '$wp_table'" ) != $wp_table) {
+        if ($this->_wpdb->get_var("show tables like '$wp_table'") != $wp_table) {
             $sql = "CREATE TABLE $wp_table (
               id mediumint(9) NOT NULL AUTO_INCREMENT,
               code tinytext NOT NULL,
@@ -292,7 +294,7 @@ class WPCodeProtectedPages
 
         $wp_log_table = $this->_tablePrefix . "$this->_tableNameLog";
 
-        if($this->_wpdb->get_var( "show tables like '$wp_log_table'" ) != $wp_log_table) {
+        if ($this->_wpdb->get_var("show tables like '$wp_log_table'") != $wp_log_table) {
             $sql = "CREATE TABLE $wp_log_table (
               id mediumint(9) NOT NULL AUTO_INCREMENT,
               entity_id integer NOT NULL,
@@ -307,51 +309,57 @@ class WPCodeProtectedPages
         }
     }
 
-    function updatePasswords()
+    public function updatePasswords()
     {
         $global = false;
         $post = $this->_post;
 
-        if (empty($this->_post) && isset($GLOBALS['post']))
-        {
+        if (empty($this->_post) && isset($GLOBALS['post'])) {
             $post = $GLOBALS['post'];
             $global = true;
         }
 
-        if( ! $post )
+        if (! $post) {
             return null;
+        }
 
-        $correct_password = is_array( $post ) ? $post['post_password'] : $post->post_password;
+        $correct_password = is_array($post) ? $post['post_password'] : $post->post_password;
 
-        if( ! $correct_password )
+        if (! $correct_password) {
             return null;
+        }
 
-        if ( ! isset( $_COOKIE['wp-postpass_' . COOKIEHASH ] ) )
+        if (! isset($_COOKIE['wp-postpass_' . COOKIEHASH ])) {
             return;
+        }
 
-        if( ! class_exists( 'PasswordHash' ) )
+        if (! class_exists('PasswordHash')) {
             require_once ABSPATH . WPINC . '/class-phpass.php';
+        }
 
-        $hasher = new PasswordHash( 8, true );
-        $hash = wp_unslash( $_COOKIE[ 'wp-postpass_' . COOKIEHASH ] );
-        if ( 0 !== strpos( $hash, '$P$B' ) )
+        $hasher = new PasswordHash(8, true);
+        $hash = wp_unslash($_COOKIE[ 'wp-postpass_' . COOKIEHASH ]);
+        if (0 !== strpos($hash, '$P$B')) {
             return;
+        }
 
         $passed = false;
 
         $entities = $this->getEntities();
-        foreach( $entities as $entity ){
-            if( ! $entity->code )
+        foreach ($entities as $entity) {
+            if (! $entity->code) {
                 continue;
+            }
 
             $check_password = $entity->code;
 
-            if( is_string( $check_password ) || is_numeric( $check_password ) )
-                $check_password = trim( $check_password );
-            else
+            if (is_string($check_password) || is_numeric($check_password)) {
+                $check_password = trim($check_password);
+            } else {
                 continue;
+            }
 
-            if( $hasher->CheckPassword( $check_password, $hash ) ){
+            if ($hasher->CheckPassword($check_password, $hash)) {
                 $passed = $check_password;
                 $this->insertLog($entity, 'LOGGED_IN');
                 $entity->used = 1;
@@ -360,17 +368,19 @@ class WPCodeProtectedPages
             }
         }
 
-        if( ! $passed )
+        if (! $passed) {
             return;
+        }
 
-        if( is_array( $post ) ){
+        if (is_array($post)) {
             $post['post_password'] = $passed;
         } else {
             $post->post_password = $passed;
         }
 
-        if( $global )
+        if ($global) {
             $GLOBALS['post'] = $post;
+        }
     }
 
     public function insertLog($entity, $action = 'ACTION_UNKNOWN')
@@ -382,8 +392,8 @@ class WPCodeProtectedPages
             [
                 'entity_id' => $entity->id,
                 'title' => $entity->name.' '.$action,
-                'details' => $entity->name.' '.$entity->description,
-                'created_at' => current_time( 'mysql' ),
+                'details' => 'Name:'.$entity->name.' Description:'.$entity->description,
+                'created_at' => current_time('mysql'),
             ]
         );
     }
@@ -394,7 +404,6 @@ class WPCodeProtectedPages
         add_action('admin_menu', [$this, 'adminMenu']);
         add_action('admin_post_wcpp_entity_post', [$this, 'createEntity']);
         add_action('template_redirect', [$this, 'updatePasswords']);
-
     }
 }
 
