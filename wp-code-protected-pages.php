@@ -51,6 +51,12 @@ class WPCodeProtectedPages
         ?>
         <div class='wrap'>
             <h2>Passcode Dashboard</h2>
+            <?php
+            if($_GET['action'] == 'entity_successful')
+            {
+                echo '<span class="info">Başarılı bir şekilde eklendi!</span>';
+            }
+            ?>
             <ul>
                 <li>Create New Code</li>
                 <li>List of Codes</li>
@@ -212,7 +218,7 @@ class WPCodeProtectedPages
 
         $this->createEntity($entity);
 
-        wp_redirect(add_query_arg(array('page' => 'wp-code-protected-pages/wp-code-protected-pages.php/new'), admin_url()));
+        wp_redirect(add_query_arg(array('page' => 'wp-code-protected-pages/wp-code-protected-pages.php','action' => 'entity_successful'), admin_url()));
     }
 
     public function createEntity($entity)
