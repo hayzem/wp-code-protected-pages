@@ -207,12 +207,14 @@ class WPCodeProtectedPages
         $entity = [
             'code' => $_POST['wcpp_code'],
             'name' => $_POST['wcpp_name'],
-            'description' => $_POST['description'],
+            'description' => $_POST['wcpp_description'],
         ];
 
         $this->createEntity($entity);
 
-        wp_redirect( add_query_arg( array('page' => 'ragld/edit-hardware', 'action'=> 'entity_saved'), admin_url() ));    }
+        wp_redirect( add_query_arg( array('page' => 'ragld/edit-hardware', 'action'=> 'entity_saved'), admin_url() ));
+
+    }
 
     public function createEntity($entity)
     {
@@ -408,7 +410,7 @@ class WPCodeProtectedPages
     {
         register_activation_hook(__FILE__, [$this, 'createPluginTables']);
         add_action('admin_menu', [$this, 'adminMenu']);
-        add_action('admin_post_wcpp_entity_post', [$this, 'createEntity']);
+        add_action('admin_post_wcpp_entity_post', [$this, 'postEntity']);
         add_action('template_redirect', [$this, 'updatePasswords']);
     }
 }
