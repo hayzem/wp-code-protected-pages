@@ -198,7 +198,7 @@ class WPCodeProtectedPages
 
     }
 
-    public function createEntity()
+    public function postEntity()
     {
         /**
          * @todo: check fields
@@ -207,9 +207,15 @@ class WPCodeProtectedPages
         $entity = [
             'code' => $_POST['wcpp_code'],
             'name' => $_POST['wcpp_name'],
-            'description' => $_POST['wcpp_description'],
+            'description' => $_POST['description'],
         ];
 
+        $this->createEntity($entity);
+
+        wp_redirect( add_query_arg( array('page' => 'ragld/edit-hardware', 'action'=> 'entity_saved'), admin_url() ));    }
+
+    public function createEntity($entity)
+    {
         $this->insertEntity($entity);
     }
 
