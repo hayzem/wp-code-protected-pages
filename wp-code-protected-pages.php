@@ -212,7 +212,7 @@ class WPCodeProtectedPages
 
         $this->createEntity($entity);
 
-        wp_redirect( add_query_arg( array('page' => 'wp-code-protected-pages/wp-code-protected-pages.php/new'), admin_url() ));
+        wp_redirect(add_query_arg(array('page' => 'wp-code-protected-pages/wp-code-protected-pages.php/new'), admin_url()));
     }
 
     public function createEntity($entity)
